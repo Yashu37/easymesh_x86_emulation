@@ -89,6 +89,7 @@ $(SOURCE_DIR)/platform/common/common.c \
 
 ## Update the object dependency rule to:
 ### makefile
+
 $(OBJ_DIR)/platform/common/common.o: $(SOURCE_DIR)/platform/common/common.c | $(OBJ_DIR)
 
 ## Alternatively, replace the incorrect path automatically using:
