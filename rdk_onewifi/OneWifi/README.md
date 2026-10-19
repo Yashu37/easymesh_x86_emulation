@@ -21,7 +21,7 @@ cd ~/Desktop/OneWifi_Workspace/OneWifi
 vim Makefile.custom
 
 Add the required compiler flags (`CFLAGS`), header include paths, source files (`C_SOURCES`), object files (`C_OBJECTS`), compilation rules, and linker settings.
-Save the file and exit Vim by pressing `Esc`, typing `:wq`, and pressing `Enter`.
+Save the file and exit.
 
 Verify the Makefile:
 ls -l Makefile.custom
