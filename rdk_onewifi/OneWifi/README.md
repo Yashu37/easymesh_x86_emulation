@@ -50,7 +50,7 @@ vim Makefile.custom
 
 Add the following include path to the existing `CFLAGS` configuration:
 
-## makefile
+--makefile
 -I$(HOME)/hostapd-2.10/src
 
 Save the file and exit.
@@ -67,11 +67,11 @@ This include-path correction allowed compilation to proceed past the missing-hea
 During compilation, the build initially failed because the Makefile referenced `common.c` under the generated build directory instead of the actual source directory.
 
 **Incorrect source path:**
-## makefile
+-- makefile
 $(BUILD_DIR)/src/platform/common/common.c
 
 **Correct source path:**
-## makefile
+-- makefile
 $(SOURCE_DIR)/platform/common/common.c
 
 ## Navigate to the OneWifi directory:
@@ -84,11 +84,11 @@ find source -type f -path "*/platform/common/common.c"
 vim Makefile.custom
 
 ## Update the source-list entry to:
-## makefile
+-- makefile
 $(SOURCE_DIR)/platform/common/common.c \
 
 ## Update the object dependency rule to:
-## makefile
+-- makefile
 $(OBJ_DIR)/platform/common/common.o: $(SOURCE_DIR)/platform/common/common.c | $(OBJ_DIR)
 
 ## Alternatively, replace the incorrect path automatically using:
@@ -112,7 +112,7 @@ The object file `build_custom/obj/platform/common/common.o` was included twice i
 ## Root Cause
 The object file was already generated through the `C_SOURCES` list and converted into an object entry by the `C_OBJECTS` rule. It was then added again explicitly using:
 
-## makefile
+-- makefile
 C_OBJECTS += $(OBJ_DIR)/platform/common/common.o
 
 This caused the same object file to appear twice in the linker command.
@@ -178,4 +178,5 @@ make -f Makefile.custom -j"$(nproc)"
 
 ## Verify the generated binary:
 ls -lh build_custom/OneWifi
+
 file build_custom/OneWifi
