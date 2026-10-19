@@ -50,7 +50,7 @@ vim Makefile.custom
 
 Add the following include path to the existing `CFLAGS` configuration:
 
-## makefile
+### makefile
 -I$(HOME)/hostapd-2.10/src
 
 Save the file and exit.
