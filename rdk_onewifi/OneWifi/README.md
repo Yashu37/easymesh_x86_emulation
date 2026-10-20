@@ -1,7 +1,6 @@
 # Step 1: Create Workspace
 ```bash
 mkdir -p ~/Desktop/OneWifi_Workspace
-
 cd ~/Desktop/OneWifi_Workspace
 ```
 # Step 2: Clone Required Repositories
@@ -33,7 +32,6 @@ PROJECT_DIR := $(CURDIR)
 SOURCE_DIR := $(PROJECT_DIR)/source
 BUILD_DIR := $(PROJECT_DIR)/build_custom
 OBJ_DIR := $(BUILD_DIR)/obj
-
 
 CFLAGS := -Wall -Wextra -g \
     -I$(PROJECT_DIR) \
