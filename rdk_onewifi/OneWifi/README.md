@@ -1,7 +1,9 @@
 # Step 1: Create Workspace
+```bash
 mkdir -p ~/Desktop/OneWifi_Workspace
-cd ~/Desktop/OneWifi_Workspace
 
+cd ~/Desktop/OneWifi_Workspace
+```
 # Step 2: Clone Required Repositories
 All repositories are cloned inside ~/Desktop/OneWifi_Workspace
 
