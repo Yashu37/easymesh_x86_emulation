@@ -1,0 +1,81 @@
+
+CC := gcc
+AR := ar
+RANLIB := ranlib
+
+ROOT := $(CURDIR)
+SRC := $(ROOT)/src
+BUILD := $(ROOT)/build_custom
+OBJ := $(BUILD)/obj
+LIB := $(BUILD)/librdk_wifihal.a
+
+HOSTAP_ROOT := /tmp/hostap211-patch-work/source/hostap-2.11/src
+HOSTAP_SUPPLICANT_ROOT := /tmp/hostap211-patch-work/source/hostap-2.11/wpa_supplicant
+
+CPPFLAGS += -D_ANSC_LINUX -D_ANSC_USER -D_ANSC_LITTLE_ENDIAN_
+CPPFLAGS += -DHOSTAPD_2_11
+CPPFLAGS += -I$(ROOT)/include
+CPPFLAGS += -I$(ROOT)/src
+CPPFLAGS += -I$(ROOT)/util_crypto
+CPPFLAGS += -I$(ROOT)/../util
+CPPFLAGS += -I$(HOSTAP_ROOT)
+CPPFLAGS += -I$(HOSTAP_ROOT)/utils
+CPPFLAGS += -I$(HOSTAP_ROOT)/ap
+CPPFLAGS += -I$(HOSTAP_ROOT)/drivers
+CPPFLAGS += -I$(ROOT)/../halinterface/include
+CPPFLAGS += -I/usr/include/cjson
+CPPFLAGS += -I$(ROOT)/../rdk-wifi-libhostap/source/hostap-2.11-test
+CPPFLAGS += -I/usr/include/libnl3
+CPPFLAGS += -DCONFIG_WEP
+CPPFLAGS += -DCONFIG_HS20
+CPPFLAGS += -DFEATURE_SUPPORT_RADIUSGREYLIST
+CPPFLAGS += -DWIFI_HAL_VERSION_3
+CPPFLAGS += -DCONFIG_WPS
+CPPFLAGS += -DRDK_ONEWIFI 
+CPPFLAGS += -DPLATFORM_LINUX
+CPPFLAGS += -D_PLATFORM_BANANAPI_R4_
+CPPFLAGS += -DBANANA_PI_PORT
+CPPFLAGS += -I$(HOSTAP_SUPPLICANT_ROOT)
+
+CFLAGS += -Wall -Wextra -Wno-unused-parameter
+CFLAGS += -Wno-pointer-sign -Wno-sign-compare -Wno-type-limits
+CFLAGS += -Wno-format-truncation -Wno-discarded-qualifiers
+CFLAGS += -fPIC
+
+SOURCES := \
+	$(SRC)/wifi_hal_rx_test.c \
+	$(SRC)/wifi_hal_data_rx.c \
+	$(SRC)/wifi_hal_dpp.c \
+	$(SRC)/wifi_hal_anqp.c \
+	$(SRC)/wifi_hal_frame_test.c \
+	$(ROOT)/util_crypto/aes_siv.c \
+	$(SRC)/wifi_tlv.c \
+	$(SRC)/wifi_hal_rdk_util.c \
+	$(SRC)/wifi_hal.c \
+	$(SRC)/wifi_hal_hostapd.c \
+	$(SRC)/wifi_hal_nl80211.c \
+	$(SRC)/wifi_hal_nl80211_events.c \
+	$(SRC)/wifi_hal_nl80211_utils.c \
+	$(SRC)/collection.c \
+	$(SRC)/wifi_hal_mgmt_rx_one_wifi.c \
+	$(SRC)/wifi_hal_wnm_rrm.c
+
+OBJECTS := $(patsubst $(ROOT)/%.c,$(OBJ)/%.o,$(SOURCES))
+
+.PHONY: all clean
+
+all: $(LIB)
+
+$(LIB): $(OBJECTS)
+	@mkdir -p $(BUILD)
+	$(AR) rcs $@ $(OBJECTS)
+	$(RANLIB) $@
+	@echo "Created $(LIB)"
+
+$(OBJ)/%.o: $(ROOT)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -rf $(BUILD)
+
