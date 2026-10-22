@@ -1,0 +1,82 @@
+
+CC := gcc
+
+ROOT := $(CURDIR)
+BUILD_DIR := build-make
+INSTALL_DIR := $(ROOT)/install-make/usr
+
+CFLAGS := -fPIC -Wall -Wextra -Wno-type-limits -fno-inline -g \
+          -DRBUS_ALWAYS_ON -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64 \
+          -DMSG_ROUNDTRIP_TIME=1
+
+CPPFLAGS := -I$(ROOT)/include \
+            -I$(ROOT)/src/rbus \
+            -I$(ROOT)/src/core \
+            -I$(ROOT)/src/rtmessage \
+            -I$(ROOT)/src/session_manager \
+            -I$(ROOT)/install/usr/include \
+            -I/usr/include/cjson
+
+LDFLAGS := -pthread
+LDLIBS := -lcjson -lmsgpackc -pthread
+
+RTMESSAGE_SRC := \
+    rtConnection.c rtCipher.c rtLog.c rtError.c \
+    rtMessageHeader.c rtEncoder.c rtMessage.c rtSocket.c \
+    rtVector.c rtList.c rtTime.c rtString.c rtSemaphore.c \
+    rtRetainable.c rtBase64.c rtThreadPool.c rtHashMap.c \
+    rtMemory.c rtrouteBase.c local_benchmarking.c
+
+RBUSCORE_SRC := rbuscore.c rbuscore_message.c
+
+RBUS_SRC := \
+    rbus.c rbus_handle.c rbus_message.c rbus_value.c \
+    rbus_property.c rbus_object.c rbus_buffer.c rbus_filter.c \
+    rbus_element.c rbus_valuechange.c rbus_subscriptions.c \
+    rbus_tokenchain.c rbus_asyncsubscribe.c rbus_intervalsubscription.c
+
+RTMESSAGE_OBJ := $(addprefix $(BUILD_DIR)/rtmessage/,$(RTMESSAGE_SRC:.c=.o))
+RBUSCORE_OBJ := $(addprefix $(BUILD_DIR)/core/,$(RBUSCORE_SRC:.c=.o))
+RBUS_OBJ := $(addprefix $(BUILD_DIR)/rbus/,$(RBUS_SRC:.c=.o))
+
+.PHONY: all clean install
+
+all: $(BUILD_DIR)/librtMessage.so \
+     $(BUILD_DIR)/librbuscore.so \
+     $(BUILD_DIR)/librbus.so
+
+$(BUILD_DIR)/rtmessage/%.o: $(ROOT)/src/rtmessage/%.c
+	mkdir -p $(@D)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/core/%.o: $(ROOT)/src/core/%.c
+	mkdir -p $(@D)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/rbus/%.o: $(ROOT)/src/rbus/%.c
+	mkdir -p $(@D)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/librtMessage.so: $(RTMESSAGE_OBJ)
+	$(CC) -shared -Wl,-soname,librtMessage.so.0 -o $@ $^ $(LDFLAGS) -lcjson
+	ln -sf librtMessage.so $@.0
+
+$(BUILD_DIR)/librbuscore.so: $(RBUSCORE_OBJ) $(BUILD_DIR)/librtMessage.so
+	$(CC) -shared -Wl,-soname,librbuscore.so.0 -o $@ $(RBUSCORE_OBJ) \
+	    -L$(BUILD_DIR) -lrtMessage $(LDLIBS) \
+	    -Wl,-rpath,'$$ORIGIN'
+	ln -sf librbuscore.so $@.0
+
+$(BUILD_DIR)/librbus.so: $(RBUS_OBJ) $(BUILD_DIR)/librbuscore.so
+	$(CC) -shared -Wl,-soname,librbus.so.0 -o $@ $(RBUS_OBJ) \
+	    -L$(BUILD_DIR) -lrbuscore -lrtMessage $(LDLIBS) \
+	    -Wl,-rpath,'$$ORIGIN'
+	ln -sf librbus.so $@.0
+
+install: all
+	mkdir -p $(INSTALL_DIR)/lib
+	cp $(BUILD_DIR)/*.so $(INSTALL_DIR)/lib/
+
+clean:
+	rm -rf $(BUILD_DIR)
+
